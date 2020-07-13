@@ -1,0 +1,14 @@
+tensorflow==1.14.0
+xgboost==1.1.1
+sklearn
+matplotlib
+statsmodels
+pandas
+numpy
+keras==2.3.1
+jupyter
+sqlalchemy
+botocore>=1.12
+boto3>=1.9
+apache-airflow[s3]>=1.10
+pmdarima
