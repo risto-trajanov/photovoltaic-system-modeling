@@ -1,5 +1,6 @@
 from datetime import timedelta
-
+from datetime import datetime
+import pandas as pd
 # The DAG object; we'll need this to instantiate a DAG
 from airflow import DAG
 # Operators; we need this to operate!
@@ -11,7 +12,11 @@ import preprocessing
 import crawl_features_weatherbit
 import sma_crawl as sma
 import prediction
+import utils
 
+
+lat = 51.1877
+long = 10.0398
 # These args will get passed on to each operator
 # You can override them on a per-task basis during operator initialization
 default_args = {
@@ -39,15 +44,15 @@ default_args = {
 }
 
 
-def sma_crawl():
+def sma_crawl_function():
     sma.main()
 
 
-def weatherbit_crawl():
+def weatherbit_crawl_function():
     crawl_features_weatherbit.main()
 
 
-def process_data():
+def process_data_function():
     preprocessing.main()
 
 
@@ -55,11 +60,11 @@ def process_data():
 #     prophet.main()
 #
 
-def train_arima():
+def train_arima_function():
     arima.main()
 
 
-def predictions():
+def predictions_function():
     prediction.main()
 
 
@@ -72,7 +77,7 @@ dag = DAG(
 
 preprocess_task = PythonOperator(
     task_id='preprocess_data',
-    python_callable=process_data(),
+    python_callable=process_data_function,
     dag=dag
 )
 
@@ -84,26 +89,26 @@ preprocess_task = PythonOperator(
 
 arima_task = PythonOperator(
     task_id='train_arima',
-    python_callable=train_arima(),
+    python_callable=train_arima_function,
     dag=dag
 )
 
-# sma_crawl_task = PythonOperator(
-#     task_id='sma_crawl',
-#     python_callable=sma_crawl(),
-#     dag=dag
-# )
+sma_crawl_task = PythonOperator(
+    task_id='sma_crawl',
+    python_callable=sma_crawl_function,
+    dag=dag
+)
 
 weatherbit_crawl_task = PythonOperator(
     task_id='weatherbit_crawl',
-    python_callable=weatherbit_crawl(),
+    python_callable=weatherbit_crawl_function,
     dag=dag
 )
 
 prediction_task = PythonOperator(
     task_id='predictions',
-    python_callable=predictions(),
+    python_callable=predictions_function,
     dag=dag
 )
 
-weatherbit_crawl_task >> preprocess_task >> arima_task >> prediction_task
+[sma_crawl_task, weatherbit_crawl_task] >> preprocess_task >> arima_task >> prediction_task

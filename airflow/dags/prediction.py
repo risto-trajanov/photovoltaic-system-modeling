@@ -26,9 +26,6 @@ api = 'https://api.weatherbit.io/v2.0/forecast/hourly?'
 # lat=51.1877&lon=10.0398&key=6a1bfa1b5b41497c94ea0d86aee73671
 
 
-
-
-
 class Predict:
     def __init__(self, target, table):
         self.table = table
@@ -60,8 +57,8 @@ class Predict:
         with open("./Models/" + arima, 'rb') as arima:
             self.arima_model = pickle.load(arima)
 
-        with open("./Models/" + prophet, 'rb') as prophet:
-            self.prophet_model = pickle.load(prophet)
+        # with open("./Models/" + prophet, 'rb') as prophet:
+        #     self.prophet_model = pickle.load(prophet)
 
     def predictions_today(self, target):
         now = date.today()
@@ -73,7 +70,6 @@ class Predict:
 
         arima_predictions = self.arima_model.predict(n_periods=len(data_for_prediction),
                                                      exogenous=data[exogenous_features])
-
 
         arima_predictions = arima_predictions.T
         datetime = data_for_prediction['datetime']
@@ -89,10 +85,12 @@ class Predict:
     def persist_predictions(self, target, predictions):
         table = 'tsdb_' + target + '_predictions'
         persist_data(table, predictions)
+        print("persisted")
 
     def prepare_data(self, data):
         arima_transform = Transform(data)
         return arima_transform.get_data()
+
 
 def main():
     table = 'tsdb_weather_forecast'
