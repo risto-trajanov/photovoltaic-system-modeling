@@ -14,7 +14,7 @@ def save_response(resp):
 
 
 class SMA:
-    #URLs usefull for navigating through sunnyportal
+    # URLs usefull for navigating through sunnyportal
     BASE_URL = 'https://www.sunnyportal.com'
     LOGIN_URL = '/Templates/Start.aspx'
     OPEN_INVERTER_URL = '/FixedPages/InverterSelection.aspx'
@@ -42,9 +42,9 @@ class SMA:
 
     def request(self, date):
         params = {
-            'ID':      'e175e9da-739c-47f0-ba9e-456aad2d0887',
+            'ID': 'e175e9da-739c-47f0-ba9e-456aad2d0887',
             'endTime': date.strftime("%m/%d/%Y %I:%M:%S %p"),
-            'splang':  'en-US', 'plantTimezoneBias': '180', 'name': ''
+            'splang': 'en-US', 'plantTimezoneBias': '180', 'name': ''
         }
         response = self.session.get('https://www.sunnyportal.com/Templates/PublicChartValues.aspx', params=params)
 
@@ -80,20 +80,23 @@ class SMA:
             row = pd.Series([datetime_object, power])
             df_rows.append(pd.DataFrame([row]))
 
-        energy_data = pd.concat(df_rows).\
-            replace([numpy.nan],0).\
-            rename(columns={0:'datetime', 1:'energy'}).\
+        energy_data = pd.concat(df_rows). \
+            replace([numpy.nan], 0). \
+            rename(columns={0: 'datetime', 1: 'energy'}). \
             set_index('datetime')
 
         return energy_data
 
 
-if __name__ == '__main__':
+def main():
     sma_requestor = SMA('', '')
     sma_requestor.login('6f2ec9b6-063e-4945-afb2-e6ee7c45f615')
     for i in range(1, 31):
-        resp = sma_requestor.request_and_parse(datetime(2020, 5, i, 23, 59, 59))
-        assert isinstance(resp,pd.DataFrame)
+        resp = sma_requestor.request_and_parse(datetime(2020, 6, i, 23, 59, 59))
+        assert isinstance(resp, pd.DataFrame)
         assert isinstance(resp.index, pd.DatetimeIndex)
         save_response(resp)
 
+
+if __name__ == '__main__':
+    main()

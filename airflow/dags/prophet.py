@@ -5,6 +5,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 import pickle
 import os
 from utils import read_data
+from preprocessing import Transform
 #from utils import upload_s3
 import datetime
 
@@ -28,62 +29,72 @@ class Prophet_Model:
         split_table.pop(0)
         split_table.pop(-1)
         self.table_name = "_".join(split_table)
-        self.lag_features()
-        self.prepare_data()
+        transform = Transform(self.data)
+        self.data = transform.get_data()
         self.train_prophet()
 
-    def lag_features(self):
-        df = self.data
-        df.reset_index(drop=True, inplace=True)
-        lag_features = ['gh', 'csky_ghi', 'tdry']
-        window1 = 3
-        window2 = 7
-        window3 = 30
+    # def lag_features(self, data=False):
+    #     df = self.data
+    #     if data:
+    #         df = data
+    #     df.reset_index(drop=True, inplace=True)
+    #     lag_features = ['gh', 'csky_ghi', 'tdry']
+    #     window1 = 3
+    #     window2 = 7
+    #     window3 = 30
+    #
+    #     df_rolled_3d = df[lag_features].rolling(window=window1, min_periods=0)
+    #     df_rolled_7d = df[lag_features].rolling(window=window2, min_periods=0)
+    #     df_rolled_30d = df[lag_features].rolling(window=window3, min_periods=0)
+    #
+    #     df_mean_3d = df_rolled_3d.mean().shift(1).reset_index().astype(np.float32)
+    #     df_mean_7d = df_rolled_7d.mean().shift(1).reset_index().astype(np.float32)
+    #     df_mean_30d = df_rolled_30d.mean().shift(1).reset_index().astype(np.float32)
+    #
+    #     df_std_3d = df_rolled_3d.std().shift(1).reset_index().astype(np.float32)
+    #     df_std_7d = df_rolled_7d.std().shift(1).reset_index().astype(np.float32)
+    #     df_std_30d = df_rolled_30d.std().shift(1).reset_index().astype(np.float32)
+    #
+    #     for feature in lag_features:
+    #         df[f"{feature}_mean_lag{window1}"] = df_mean_3d[feature]
+    #         df[f"{feature}_mean_lag{window2}"] = df_mean_7d[feature]
+    #         df[f"{feature}_mean_lag{window3}"] = df_mean_30d[feature]
+    #
+    #         df[f"{feature}_std_lag{window1}"] = df_std_3d[feature]
+    #         df[f"{feature}_std_lag{window2}"] = df_std_7d[feature]
+    #         df[f"{feature}_std_lag{window3}"] = df_std_30d[feature]
+    #
+    #     df.fillna(df.mean(), inplace=True)
+    #
+    #     df.set_index("datetime", drop=False, inplace=True)
+    #
+    # def prepare_data(self, data=False):
+    #     df = self.data
+    #     date = self.split_date
+    #
+    #     if data:
+    #         df = data
+    #
+    #     df.datetime = pd.to_datetime(df.datetime, format="%Y-%m-%d %H:%M:%S")
+    #     df["month"] = df.datetime.dt.month
+    #     df["week"] = df.datetime.dt.week
+    #     df["day"] = df.datetime.dt.day
+    #     df["day_of_week"] = df.datetime.dt.dayofweek
+    #
+    #     df_train = df[df.datetime < date]
+    #     df_valid = df[df.datetime >= date]
+    #
+    #     self.df_train = df_train
+    #     self.df_valid = df_valid
+    #
+    #     return df
 
-        df_rolled_3d = df[lag_features].rolling(window=window1, min_periods=0)
-        df_rolled_7d = df[lag_features].rolling(window=window2, min_periods=0)
-        df_rolled_30d = df[lag_features].rolling(window=window3, min_periods=0)
-
-        df_mean_3d = df_rolled_3d.mean().shift(1).reset_index().astype(np.float32)
-        df_mean_7d = df_rolled_7d.mean().shift(1).reset_index().astype(np.float32)
-        df_mean_30d = df_rolled_30d.mean().shift(1).reset_index().astype(np.float32)
-
-        df_std_3d = df_rolled_3d.std().shift(1).reset_index().astype(np.float32)
-        df_std_7d = df_rolled_7d.std().shift(1).reset_index().astype(np.float32)
-        df_std_30d = df_rolled_30d.std().shift(1).reset_index().astype(np.float32)
-
-        for feature in lag_features:
-            df[f"{feature}_mean_lag{window1}"] = df_mean_3d[feature]
-            df[f"{feature}_mean_lag{window2}"] = df_mean_7d[feature]
-            df[f"{feature}_mean_lag{window3}"] = df_mean_30d[feature]
-
-            df[f"{feature}_std_lag{window1}"] = df_std_3d[feature]
-            df[f"{feature}_std_lag{window2}"] = df_std_7d[feature]
-            df[f"{feature}_std_lag{window3}"] = df_std_30d[feature]
-
-        df.fillna(df.mean(), inplace=True)
-
-        df.set_index("datetime", drop=False, inplace=True)
-
-    def prepare_data(self):
+    def train_prophet(self):
         df = self.data
         date = self.split_date
 
-        df.datetime = pd.to_datetime(df.datetime, format="%Y-%m-%d %H:%M:%S")
-        df["month"] = df.datetime.dt.month
-        df["week"] = df.datetime.dt.week
-        df["day"] = df.datetime.dt.day
-        df["day_of_week"] = df.datetime.dt.dayofweek
-
         df_train = df[df.datetime < date]
         df_valid = df[df.datetime >= date]
-
-        self.df_train = df_train
-        self.df_valid = df_valid
-
-    def train_prophet(self):
-        df_train = self.df_train.copy(deep=False)
-        df_valid = self.df_valid.copy(deep=False)
         target = self.target
 
         model_fbp = Prophet(mcmc_samples=300)
@@ -96,7 +107,7 @@ class Prophet_Model:
             df_valid[["datetime", target] + exogenous_features].rename(columns={"datetime": "ds"}))
         df_valid["Forecast_Prophet"] = forecast.yhat.values
 
-        self.df_valid_prophet = df_train
+        self.df_valid = df_valid
 
         date_time = str(datetime.datetime.now().strftime("%d_%m_%Y"))
         date_time = date_time.replace(" ", "_")

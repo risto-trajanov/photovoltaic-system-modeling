@@ -11,15 +11,22 @@ def get_connection():
     # hook = PostgresHook(conn_name_attr='tsdb')
     # conn = hook.get_connection('tsdb')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}'.format(
-        db_host='34.69.215.94',
-        db_name='snpiao_data',
-        db_password='ucamnafinki',
-        db_user='snpiao_data',
+        db_host = '34.69.215.94',
+        db_name = 'snpiao_data',
+        db_password = 'ucamnafinki',
+        db_user = 'snpiao_data',
     )
+
+    # db_host = '34.69.215.94',
+    # db_name = 'snpiao_data',
+    # db_password = 'ucamnafinki',
+    # db_user = 'snpiao_data',
+
     # db_host = conn.host,
     # db_name = conn.schema,
     # db_password = conn.password,
     # db_user = conn.login,
+
     engine = create_engine(SQLALCHEMY_DATABASE_URI)
     return engine.connect()
 
@@ -32,7 +39,7 @@ def read_data(table):
     return data
 
 
-def read_data_for_day(table, day, id):
+def read_data_for_day(table, day, id=False):
     connection = get_connection()
 
     day = datetime.strptime(day, '%Y-%m-%d')  # YYYY-MM-DD
@@ -43,7 +50,7 @@ def read_data_for_day(table, day, id):
 
     data = pandas.read_sql_query(query, connection)
     data = data.set_index('datetime')
-    del data['id']
+    #del data['id']
     connection.close()
     return data
 
