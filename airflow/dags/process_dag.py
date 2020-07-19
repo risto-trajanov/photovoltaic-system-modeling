@@ -72,7 +72,7 @@ dag = DAG(
     'Energize',
     default_args=default_args,
     description='A simple tutorial DAG',
-    schedule_interval=timedelta(days=1),
+    schedule_interval='@once',
 )
 
 preprocess_task = PythonOperator(

@@ -6,6 +6,7 @@ import numpy as np
 from pmdarima import auto_arima
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from utils import read_data
+from utils import upload_s3
 import pandas as pd
 pd.options.mode.chained_assignment = None
 
@@ -72,8 +73,8 @@ class Arima:
         with open("Models/" + filename_arima, 'wb') as filename_arima:
             pickle.dump(model, filename_arima)
 
-    # def save_model_s3(self):
-    #     upload_s3(self.filename_arima)
+    def save_model_s3(self):
+        upload_s3(self.filename_arima)
 
     def validation_arima(self):
         target = self.target
@@ -92,11 +93,13 @@ def main():
     target = data.columns[-1]
     arima_prediction = Arima(data, target, table)
     arima_prediction.save_model_localy()
+    arima_prediction.save_model_s3()
     table = 'tsdb_sma_weatherbit_cleaned'
     data = read_data(table)
     target = data.columns[-1]
     arima_prediction = Arima(data, target, table)
     arima_prediction.save_model_localy()
+    arima_prediction.save_model_s3()
 
 
 if __name__ == "__main__":

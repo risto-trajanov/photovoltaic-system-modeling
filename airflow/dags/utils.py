@@ -8,8 +8,8 @@ from sqlalchemy import create_engine
 
 
 def get_connection():
-    # hook = PostgresHook(conn_name_attr='tsdb')
-    # conn = hook.get_connection('tsdb')
+    hook = PostgresHook(conn_name_attr='tsdb')
+    conn = hook.get_connection('tsdb')
     SQLALCHEMY_DATABASE_URI = 'postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}'.format(
         db_host = '34.69.215.94',
         db_name = 'snpiao_data',
@@ -100,13 +100,14 @@ def persist_data(table, data, id=False):
 S3_BUCKET_NAME = 'snpiao'
 
 
-# def download_s3(file):
-#     s3 = S3Hook()
-#     with tempfile.NamedTemporaryFile(delete=False) as tmp:
-#         s3.get_key(file, S3_BUCKET_NAME).download_fileobj(tmp)
-#         return tmp.name
-#
-#
-# def upload_s3(file):
-#     s3 = S3Hook()
-#     return s3.load_file(file, file, bucket_name=S3_BUCKET_NAME, replace=True)
+def download_s3(file):
+    s3 = S3Hook(aws_conn_id='my_conn_S3')
+
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        s3.get_key(file, S3_BUCKET_NAME).download_fileobj(tmp)
+        return tmp.name
+
+
+def upload_s3(file):
+    s3 = S3Hook(aws_conn_id='my_conn_S3')
+    return s3.load_file(file, file, bucket_name=S3_BUCKET_NAME, replace=True)

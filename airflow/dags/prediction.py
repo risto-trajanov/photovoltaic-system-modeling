@@ -3,6 +3,7 @@ import pandas as pd
 import json
 from utils import persist_data
 from utils import read_data_for_day
+from utils import download_s3
 from datetime import datetime
 from datetime import date
 import numpy
@@ -29,7 +30,7 @@ api = 'https://api.weatherbit.io/v2.0/forecast/hourly?'
 class Predict:
     def __init__(self, target, table):
         self.table = table
-        self.models(target)
+        self.model_from_s3(target)
         predictions = self.predictions_today(target)
         self.persist_predictions(target, predictions)
 
@@ -59,6 +60,13 @@ class Predict:
 
         # with open("./Models/" + prophet, 'rb') as prophet:
         #     self.prophet_model = pickle.load(prophet)
+
+    def model_from_s3(self, target):
+        arima = 'arima_model_' + target
+        now = date.today()
+        arima = arima + f'_{now.day:02d}_{now.month:02d}_{now.year}.pickle'
+        model = download_s3(arima)
+        self.arima_model = model
 
     def predictions_today(self, target):
         now = date.today()
