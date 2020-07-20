@@ -82,20 +82,20 @@ def create_model():
 #     data = data.set_index('datetime')
 #     connection.close()
 #     return data
-table = 'tsdb_cams_mera_cleaned'
-df = read_data(table)
-#df = pd.read_csv('clean_targets.csv')
-print(df)
-seq = np.array(df['consumption'])
-print(seq)
-
-# choose a number of time steps
-# 24 steps for 24 hours (1day)
-n_steps = 24
-# choose a number of features
-n_features = 1
-# split into samples
-X, y = split_sequence(seq, n_steps)
+# table = 'tsdb_cams_mera_cleaned'
+# df = read_data(table)
+# #df = pd.read_csv('clean_targets.csv')
+# print(df)
+# seq = np.array(df['consumption'])
+# print(seq)
+#
+# # choose a number of time steps
+# # 24 steps for 24 hours (1day)
+# n_steps = 24
+# # choose a number of features
+# n_features = 1
+# # split into samples
+# X, y = split_sequence(seq, n_steps)
 
 def train_save_uni():
     table = 'tsdb_cams_mera_cleaned'

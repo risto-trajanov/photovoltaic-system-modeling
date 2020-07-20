@@ -97,6 +97,3 @@ def main():
         assert isinstance(resp.index, pd.DatetimeIndex)
         save_response(resp)
 
-
-if __name__ == '__main__':
-    main()

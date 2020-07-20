@@ -119,6 +119,3 @@ def main():
     preprocess = Preprocessing(features, table)
     preprocess.weatherbit()
 
-
-if __name__ == "__main__":
-    main()

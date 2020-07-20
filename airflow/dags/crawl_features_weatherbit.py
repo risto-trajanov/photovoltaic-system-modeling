@@ -76,5 +76,3 @@ def main():
     crawler = Crawl(lat, long)
 
 
-if __name__ == "__main__":
-    main()

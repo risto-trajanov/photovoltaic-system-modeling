@@ -157,5 +157,3 @@ def main():
     prophet_prediction.save_model_localy()
 
 
-if __name__ == "__main__":
-    main()

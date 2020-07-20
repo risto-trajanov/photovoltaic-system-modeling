@@ -108,6 +108,3 @@ def main():
     target = 'energy'
     prediction_consumption = Predict(target, table)
 
-
-if __name__ == '__main__':
-    main()

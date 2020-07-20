@@ -102,5 +102,3 @@ def main():
     arima_prediction.save_model_s3()
 
 
-if __name__ == "__main__":
-    main()
