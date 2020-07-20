@@ -62,11 +62,14 @@ class Predict:
         #     self.prophet_model = pickle.load(prophet)
 
     def model_from_s3(self, target):
-        arima = 'arima_model_' + target
+        arima = 'temp_arima_model_' + target
         now = date.today()
         arima = arima + f'_{now.day:02d}_{now.month:02d}_{now.year}.pickle'
-        model = download_s3(arima)
-        self.arima_model = model
+        s3_path = os.path.join('Models', arima)
+        print(s3_path)
+        model = download_s3(s3_path)
+        with open(model, 'rb') as pickle_model:
+            self.arima_model = pickle.load(pickle_model)
 
     def predictions_today(self, target):
         now = date.today()

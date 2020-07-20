@@ -58,20 +58,23 @@ class Arima:
         filename_temp = 'temp_arima_model_' + self.target + '_' + date_time + '.pickle'
         # save the model to disk
         self.filename_temp = filename_temp
-        with open("Models/" + filename_temp, 'wb') as filename_temp:
+        os.makedirs('Models', exist_ok=True)
+        with open(os.path.join("Models", filename_temp), 'wb') as filename_temp:
             pickle.dump(model, filename_temp)
 
     def save_model_localy(self):
+        os.makedirs('Models', exist_ok=True)
         # save the model to disk
-        with open("Models/" + self.filename_temp, 'rb') as filename_temp:
+        with open(os.path.join("Models", self.filename_temp), 'rb') as filename_temp:
             model = pickle.load(filename_temp)
         date_time = str(datetime.datetime.now().strftime("%d_%m_%Y"))
         filename_arima = 'arima_model_' + self.target + '_' + date_time + '.pickle'
         if os.path.exists(filename_arima):
             os.remove(filename_arima)
         self.filename_arima = filename_arima
-        with open("Models/" + filename_arima, 'wb') as filename_arima:
+        with open(os.path.join("Models", self.filename_temp), 'wb') as filename_arima:
             pickle.dump(model, filename_arima)
+        self.filename_arima = os.path.join("Models", self.filename_temp)
 
     def save_model_s3(self):
         upload_s3(self.filename_arima)
